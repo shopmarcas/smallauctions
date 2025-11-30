@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12 text-center">
+        <h1>Welcome to SmallAuctions</h1>
+        <p class="lead">The best place to buy and sell items with 0% fees.</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for auction in auctions %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ auction.title }}</h5>
+                <p class="card-text">{{ auction.description|truncatewords:20 }}</p>
+                <p class="card-text"><strong>Current Price:</strong> {{ auction.currency }} {{ auction.current_price }}
+                </p>
+                <p class="card-text"><small class="text-muted">Ends: {{ auction.end_time }}</small></p>
+                <a href="{% url 'auction_detail' auction.pk %}" class="btn btn-primary">View Auction</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-center">No active auctions found.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

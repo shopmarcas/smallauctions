@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>{{ auction.title }}</h2>
+        <p class="text-muted">Category: {{ auction.category.name|default:"None" }}</p>
+        <p>{{ auction.description }}</p>
+        <hr>
+        <h4>Current Price: {{ auction.currency }} {{ auction.current_price }}</h4>
+        <p>Starting Price: {{ auction.currency }} {{ auction.starting_price }}</p>
+        <p>Seller: {{ auction.seller.username }}</p>
+        <p>Ends: {{ auction.end_time }}</p>
+
+        {% if is_winner %}
+        <div class="alert alert-success mt-4">
+            <h4>Congratulations! You won this auction.</h4>
+            {% if payment_done %}
+            <p>Payment has been completed.</p>
+            {% else %}
+            <form action="{% url 'create_checkout_session' auction.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg">Pay Now</button>
+            </form>
+            {% endif %}
+        </div>
+        {% elif user.is_authenticated %}
+        {% if auction.is_active %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Place a Bid</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_amount" class="form-label">Bid Amount</label>
+                        <input type="number" name="amount" step="0.01" class="form-control" id="id_amount" required>
+                        {% if form.amount.errors %}
+                        <div class="text-danger">
+                            {{ form.amount.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Place Bid</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-4">This auction has ended.</div>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-info mt-4">Please <a href="{% url 'login' %}">login</a> to place a bid.</div>
+        {% endif %}
+    </div>
+    <div class="col-md-4">
+        <h4>Bid History</h4>
+        <ul class="list-group">
+            {% for bid in bids %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ bid.bidder.username }}
+                <span class="badge bg-primary rounded-pill">{{ auction.currency }} {{ bid.amount }}</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item">No bids yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
