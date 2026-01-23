@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Auction - SmallAuctions{% endblock %}
+{% block title %}Edit Auction - SmallAuctions{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Auction</h4>
+                <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit Auction</h4>
             </div>
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
@@ -15,7 +15,7 @@
 
                     <div class="mb-3">
                         <label for="id_title" class="form-label">Title *</label>
-                        <input type="text" name="title" class="form-control {% if form.title.errors %}is-invalid{% endif %}" id="id_title" value="{{ form.title.value|default:'' }}" required maxlength="200" placeholder="What are you selling?">
+                        <input type="text" name="title" class="form-control {% if form.title.errors %}is-invalid{% endif %}" id="id_title" value="{{ form.title.value|default:'' }}" required maxlength="200">
                         {% for error in form.title.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
@@ -23,7 +23,7 @@
 
                     <div class="mb-3">
                         <label for="id_description" class="form-label">Description *</label>
-                        <textarea name="description" class="form-control {% if form.description.errors %}is-invalid{% endif %}" id="id_description" rows="4" required placeholder="Describe your item in detail...">{{ form.description.value|default:'' }}</textarea>
+                        <textarea name="description" class="form-control {% if form.description.errors %}is-invalid{% endif %}" id="id_description" rows="4" required>{{ form.description.value|default:'' }}</textarea>
                         {% for error in form.description.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
@@ -31,8 +31,14 @@
 
                     <div class="mb-3">
                         <label for="id_image" class="form-label">Image</label>
+                        {% if auction.image %}
+                            <div class="mb-2">
+                                <img src="{{ auction.image.url }}" class="img-thumbnail" style="max-height: 150px;">
+                                <small class="d-block text-muted">Current image</small>
+                            </div>
+                        {% endif %}
                         <input type="file" name="image" class="form-control {% if form.image.errors %}is-invalid{% endif %}" id="id_image" accept="image/*">
-                        <small class="text-muted">Upload an image of your item (optional but recommended)</small>
+                        <small class="text-muted">Upload a new image to replace the current one</small>
                         {% for error in form.image.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
@@ -44,7 +50,7 @@
                             <select name="category" class="form-select" id="id_category">
                                 <option value="">-- Select Category --</option>
                                 {% for choice in form.category.field.queryset %}
-                                    <option value="{{ choice.pk }}" {% if form.category.value == choice.pk|stringformat:"s" %}selected{% endif %}>{{ choice.name }}</option>
+                                    <option value="{{ choice.pk }}" {% if form.category.value == choice.pk|stringformat:"s" or auction.category.pk == choice.pk %}selected{% endif %}>{{ choice.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -52,7 +58,7 @@
                             <label for="id_starting_price" class="form-label">Starting Price (USD) *</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
-                                <input type="number" name="starting_price" step="0.01" min="0.01" class="form-control {% if form.starting_price.errors %}is-invalid{% endif %}" id="id_starting_price" value="{{ form.starting_price.value|default:'' }}" required placeholder="0.00">
+                                <input type="number" name="starting_price" step="0.01" min="0.01" class="form-control {% if form.starting_price.errors %}is-invalid{% endif %}" id="id_starting_price" value="{{ form.starting_price.value|default:auction.starting_price }}" required>
                             </div>
                             {% for error in form.starting_price.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
@@ -62,8 +68,7 @@
 
                     <div class="mb-3">
                         <label for="id_end_time" class="form-label">End Time *</label>
-                        <input type="datetime-local" name="end_time" class="form-control {% if form.end_time.errors %}is-invalid{% endif %}" id="id_end_time" value="{{ form.end_time.value|default:'' }}" required>
-                        <small class="text-muted">When should this auction end?</small>
+                        <input type="datetime-local" name="end_time" class="form-control {% if form.end_time.errors %}is-invalid{% endif %}" id="id_end_time" value="{{ auction.end_time|date:'Y-m-d\\TH:i' }}" required>
                         {% for error in form.end_time.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
@@ -72,9 +77,9 @@
                     <hr>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'index' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="{% url 'auction_detail' auction.pk %}" class="btn btn-outline-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg"></i> Create Auction
+                            <i class="bi bi-check-lg"></i> Save Changes
                         </button>
                     </div>
                 </form>

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} - SmallAuctions{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Categories</a></li>
+                <li class="breadcrumb-item active">{{ category.name }}</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-tag"></i> {{ category.name }}</h1>
+        <p class="lead">{{ auctions|length }} active auction{{ auctions|length|pluralize }} in this category</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for auction in auctions %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 auction-card">
+            {% if auction.image %}
+                <img src="{{ auction.image.url }}" class="card-img-top" alt="{{ auction.title }}">
+            {% else %}
+                <div class="placeholder-img">
+                    <i class="bi bi-image"></i>
+                </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ auction.title }}</h5>
+                <p class="card-text">{{ auction.description|truncatewords:15 }}</p>
+                <p class="card-text">
+                    <strong class="text-primary fs-5">{{ auction.currency }} {{ auction.current_price }}</strong>
+                </p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="bi bi-clock"></i> Ends: {{ auction.end_time|date:"M d, Y H:i" }}
+                    </small>
+                </p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="bi bi-person"></i> Seller: {{ auction.seller.username }}
+                    </small>
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'auction_detail' auction.pk %}" class="btn btn-primary w-100">
+                    <i class="bi bi-eye"></i> View Auction
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            <h4>No auctions in this category</h4>
+            <p>Be the first to create one!</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'create_auction' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create Auction
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

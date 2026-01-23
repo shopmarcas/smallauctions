@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - SmallAuctions{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-person-circle"></i> My Profile</h1>
+        <p class="lead">Manage your account settings</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Profile Stats -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Member since</span>
+                    <strong>{{ user.date_joined|date:"M d, Y" }}</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Auctions Created</span>
+                    <strong>{{ total_auctions }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Bids Placed</span>
+                    <strong>{{ total_bids }}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Auctions Won</span>
+                    <strong>{{ auctions_won }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Links</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{% url 'create_auction' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-plus-circle"></i> Create Auction
+                </a>
+                <a href="{% url 'index' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-grid"></i> Browse Auctions
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Form -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pencil"></i> Edit Profile</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <h6 class="text-muted mb-3">Account Information</h6>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control {% if user_form.email.errors %}is-invalid{% endif %}" value="{{ user_form.email.value|default:'' }}">
+                            {% for error in user_form.email.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user_form.first_name.value|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user_form.last_name.value|default:'' }}">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="text-muted mb-3">Profile Settings</h6>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Display Name</label>
+                            <input type="text" name="display_name" class="form-control" value="{{ profile_form.display_name.value|default:'' }}" placeholder="How others will see you">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Country</label>
+                            <select name="country" class="form-select">
+                                {% for value, label in profile_form.country.field.choices %}
+                                    <option value="{{ value }}" {% if profile_form.country.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
