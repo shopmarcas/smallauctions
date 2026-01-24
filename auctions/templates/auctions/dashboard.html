@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SmallAuctions{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+        <p class="lead">Welcome back, {{ user.username }}!</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Active Auctions</h5>
+                <p class="display-6">{{ active_auctions|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Winning Bids</h5>
+                <p class="display-6">{{ winning_bids|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Won Auctions</h5>
+                <p class="display-6">{{ won_auctions|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Pending Payments</h5>
+                <p class="display-6 {% if pending_payments %}text-danger{% endif %}">{{ pending_payments|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Payments Alert -->
+{% if pending_payments %}
+<div class="alert alert-warning">
+    <h5><i class="bi bi-exclamation-triangle"></i> Pending Payments</h5>
+    <p>You have {{ pending_payments|length }} auction{{ pending_payments|length|pluralize }} waiting for payment.</p>
+    <ul class="list-unstyled mb-0">
+        {% for auction in pending_payments %}
+            <li class="mb-2">
+                <strong>{{ auction.title }}</strong> - {{ auction.currency }} {{ auction.current_price }}
+                <a href="{% url 'auction_detail' auction.pk %}" class="btn btn-sm btn-success ms-2">
+                    <i class="bi bi-credit-card"></i> Pay Now
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- My Active Auctions -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-tag"></i> My Active Auctions</h5>
+                <a href="{% url 'create_auction' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> New
+                </a>
+            </div>
+            <div class="card-body">
+                {% if active_auctions %}
+                    <div class="list-group list-group-flush">
+                        {% for auction in active_auctions %}
+                            <a href="{% url 'auction_detail' auction.pk %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ auction.title }}</h6>
+                                    <small class="text-primary">{{ auction.currency }} {{ auction.current_price }}</small>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> Ends: {{ auction.end_time|date:"M d, H:i" }}
+                                    | {{ auction.bids.count }} bid{{ auction.bids.count|pluralize }}
+                                </small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-3">No active auctions</p>
+                    <div class="text-center">
+                        <a href="{% url 'create_auction' %}" class="btn btn-primary">Create Your First Auction</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Auctions I'm Winning -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-trophy"></i> Auctions I'm Winning</h5>
+            </div>
+            <div class="card-body">
+                {% if winning_bids %}
+                    <div class="list-group list-group-flush">
+                        {% for auction in winning_bids %}
+                            <a href="{% url 'auction_detail' auction.pk %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ auction.title }}</h6>
+                                    <span class="badge winning-badge text-white">Winning!</span>
+                                </div>
+                                <small class="text-muted">
+                                    Current bid: {{ auction.currency }} {{ auction.current_price }}
+                                    | Ends: {{ auction.end_time|date:"M d, H:i" }}
+                                </small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-3">You're not winning any auctions</p>
+                    <div class="text-center">
+                        <a href="{% url 'index' %}" class="btn btn-outline-primary">Browse Auctions</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Bids -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-currency-dollar"></i> My Recent Bids</h5>
+            </div>
+            <div class="card-body">
+                {% if my_bids %}
+                    <div class="list-group list-group-flush">
+                        {% for bid in my_bids %}
+                            <a href="{% url 'auction_detail' bid.auction.pk %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ bid.auction.title }}</h6>
+                                    <small>{{ bid.auction.currency }} {{ bid.amount }}</small>
+                                </div>
+                                <small class="text-muted">{{ bid.created_at|date:"M d, Y H:i" }}</small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-3">No bids yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Won Auctions -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-award"></i> Won Auctions</h5>
+            </div>
+            <div class="card-body">
+                {% if won_auctions %}
+                    <div class="list-group list-group-flush">
+                        {% for auction in won_auctions %}
+                            <a href="{% url 'auction_detail' auction.pk %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ auction.title }}</h6>
+                                    <small>{{ auction.currency }} {{ auction.current_price }}</small>
+                                </div>
+                                <small class="text-muted">Won on {{ auction.end_time|date:"M d, Y" }}</small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-3">No won auctions yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ended Auctions -->
+{% if ended_auctions %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-archive"></i> My Ended Auctions</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Final Price</th>
+                                <th>Bids</th>
+                                <th>Ended</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for auction in ended_auctions %}
+                                <tr>
+                                    <td><a href="{% url 'auction_detail' auction.pk %}">{{ auction.title }}</a></td>
+                                    <td>{{ auction.currency }} {{ auction.current_price }}</td>
+                                    <td>{{ auction.bids.count }}</td>
+                                    <td>{{ auction.end_time|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if auction.bids.count > 0 %}
+                                            <span class="badge bg-success">Sold</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No bids</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

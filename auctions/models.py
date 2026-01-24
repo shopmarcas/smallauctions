@@ -25,6 +25,7 @@ class Category(models.Model):
 class AuctionItem(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    image = models.ImageField(upload_to='auction_images/', blank=True, null=True)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='auctions')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='auctions')
     starting_price = models.DecimalField(max_digits=10, decimal_places=2)

@@ -5,37 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SmallAuctions{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .auction-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+        .auction-card .placeholder-img {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        .bid-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .stats-card {
+            border-left: 4px solid #0d6efd;
+        }
+        .winning-badge {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">SmallAuctions</a>
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="bi bi-hammer"></i> SmallAuctions
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'index' %}">Browse Auctions</a>
+                        <a class="nav-link" href="{% url 'index' %}"><i class="bi bi-grid"></i> Browse</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'category_list' %}"><i class="bi bi-tags"></i> Categories</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'create_auction' %}">Create Auction</a>
+                            <a class="nav-link" href="{% url 'create_auction' %}"><i class="bi bi-plus-circle"></i> Create Auction</a>
                         </li>
                         <li class="nav-item">
-                            <span class="nav-link">Hello, {{ user.username }}</span>
+                            <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> My Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Register</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -44,12 +83,24 @@
     </nav>
 
     <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         {% block content %}
         {% endblock %}
     </div>
 
-    <footer class="text-center mt-5 py-3 bg-light">
-        <p>&copy; 2023 SmallAuctions. No commissions, ever.</p>
+    <footer class="text-center mt-5 py-4 bg-dark text-light">
+        <div class="container">
+            <p class="mb-1"><i class="bi bi-hammer"></i> SmallAuctions</p>
+            <p class="mb-0 text-muted">No commissions, ever. Buy and sell freely.</p>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
